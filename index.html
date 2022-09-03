@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>南方科技大学陈克杰课题组</title>
+  <!--标题-->
+
+  <!--Echarts-->
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@4.6.0/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.js"></script>
+  <!-- <script src="libs/node_modules/ol-echarts/dist/ol-echarts.js"></script> -->
+
+  <!--FontAwesome开源库-->
+  <link type="text/css" rel="stylesheet" href="libs/font-awesome-4.7.0/css/font-awesome.min.css">
+
+  <!--ol库-->
+  <link rel="stylesheet" href="libs/ol.css">
+  <script src="libs/ol.js"></script>
+
+  <!-- 开源库jQuery -->
+  <script src="libs/jquery-1.11.2.min.js"></script>
+
+  <!-- fileSaver开源库，用于保存数据 -->
+  <script src="libs/FileSaver.js"></script>
+
+  <!-- 百度API -->
+  <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=kB5yeVizxgKa82lXGOdvTiEpyzPeEzSx"></script>
+  <script type="text/javascript"
+    src="https://fastly.jsdelivr.net/npm/echarts@4.6.0/dist/extension/bmap.min.js"></script>
+</head>
+
+<style>
+  #header {
+    width: 100%;
+    height: 50px;
+    z-index: 0;
+    position: absolute;
+
+    background-color: rgba(0, 0, 0, 0.2);
+    vertical-align: middle;
+  }
+
+  #header #title {
+    width: 1000px;
+    height: 100%;
+    margin: 0 auto;
+   
+    
+    background-image: url('/images/department_logo/blue_cn_dp.png'), url('/images/校徽+中英文火炬/组合1：校徽+中英文校名-左右/LOGO.png');
+    background-size: auto 100%, auto 260px;
+    background-position: 66% 50%, 34% 50%;
+    background-repeat: no-repeat;
+
+
+  }
+
+  * {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    text-decoration: none;
+
+  }
+
+  .sidebar {
+    position: fixed;
+    left: -400px;
+    width: 400px;
+    height: 100%;
+    background: rgba(0, 63, 67, 1);
+    transition: all .5s ease;
+    z-index: 1;
+  }
+
+  .sidebar .top {
+    font-size: 22px;
+    color: #fff;
+    text-align: center;
+    height: 60px;
+    line-height: 51px;
+    background-color: rgb(14, 44, 70);
+    user-select: none;
+
+  }
+
+  .sidebar ul a {
+    display: block;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    line-height: 45px;
+    font-size: 18px;
+    color: #fff;
+    box-sizing: border-box;
+    border-top: 1px solid rgba(255, 255, 255, .1);
+    border-bottom: 1px solid rgb(17, 73, 118);
+    transition: .4s;
+  }
+
+  ul li:hover a {
+    padding-left: 30px;
+    color: #5587f4;
+    border-left: 5px solid #5587f4;
+    transition: all 0.5s;
+  }
+
+  .sidebar ul a i {
+    margin-right: 16px;
+  }
+
+  #check {
+    display: none;
+    margin-top: 20px;
+  }
+
+  label #btn,
+  label #cancel {
+    position: fixed;
+    cursor: pointer;
+    background-color: #0c587e;
+    border-radius: 3px;
+  }
+
+  label #btn {
+    left: 5px;
+    top: 7px;
+    font-size: 25px;
+    color: #fff;
+    padding: 6px 10px;
+    transition: all .5s;
+    z-index: 1;
+  }
+
+  label #cancel {
+    z-index: 2;
+    left: -145px;
+    top: 10px;
+    font-size: 25px;
+    color: rgb(188, 190, 223);
+    padding: 4px 9px;
+    transition: all .5s ease;
+  }
+
+  #check:checked~.sidebar {
+    left: 0;
+  }
+
+  #check:checked~label #btn {
+    left: 10px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #check:checked~label #cancel {
+    left: 350px;
+    z-index: 2;
+
+  }
+
+  .content {
+
+    height: 100vh;
+    transition: all .5s;
+    display: flex;
+    justify-content: space-around;
+    z-index: 0;
+  }
+
+  .map {
+    height: 100%;
+    width: 100%;
+    margin-top: 55px;
+    margin-left: 5px;
+    margin-right: 5px;
+  }
+
+  #check:checked~.content {
+    margin-left: 400px;
+  }
+
+  #datadisplay {
+    background-color: rgba(106, 113, 108, 0.2);
+    margin-right: 5px;
+    width: 25%;
+    height: 100%;
+    margin-top: 55px
+  }
+</style>
+
+<body>
+
+  <!--网页标题部分-->
+  <div id="header">
+
+    <div id="title"></div>
+  </div>
+
+  <!--设置开启与关闭时的卡片开关-->
+  <input type="checkbox" id="check">
+  <label for="check">
+    <i class="fa fa-bars" id="btn"> 图层管理</i>
+    <i class="fa fa-times" id="cancel"></i>
+  </label>
+
+  <!--打开时的卡片图层管理区-->
+  <div class="sidebar">
+    <div class="top">Hi~</div>
+    <!--       <li><a href="#">
+          <strong style="font-size: larger;">动态地震（暂）</strong>
+          <input type="checkbox" id="start_Anime">
+        </a>
+      </li> -->
+    <ul>
+      <li style="text-align:center">
+        <a href="http://ess.sustech.edu.cn/New-detail-id-655.html" target="_blank" style="display:inline "><i
+            class="fa fa-plane" aria-hidden="true"></i>青海科考</a>&nbsp
+        <a href="/videos/video_1.mp4" target="_blank" style="display:inline"><i class="fa fa-file-video-o"
+            aria-hidden="true"></i></a>
+
+      </li>
+    </ul>
+    <ul>
+      <li style="text-align:center">
+        <a href="https://faculty.sustech.edu.cn/chenkj/" target="_blank" style="display:inline "><i
+            class="fa fa-address-book"></i>关于我们</a>&nbsp
+        <a href="/videos/video_0.mp4" target="_blank" style="display:inline"><i class="fa fa-file-video-o"
+            aria-hidden="true"></i></a>
+      </li>
+    </ul>
+  </div>
+
+
+  <!--主地图展示区-->
+  <div class="content" id="content">
+    <div class="map" id="map"> </div>
+
+    <!-- http://ess.sustech.edu.cn/New-detail-id-655.html -->
+
+
+</body>
+<script>
+  //为动态地震设计的刷新函数
+  function mounted(item, option) {
+    this.interval = setInterval(() => {
+      //window.location.reload();
+      item.setOption(option)
+      console.log('option 已重新')
+      //selectAdd()  
+    }, 60000);
+    document.onclick = (event) => {
+      clearInterval(this.interval);
+      this.interval = setInterval(() => {
+        item.setOption(option)
+        console.log('option 已重新1')
+        //selectAdd()
+      }, 60000);
+    };
+  }
+
+  //这里小放一个时间戳转换工具
+  function add0(m) { return m < 10 ? '0' + m : m }
+  function format(shijianchuo) {
+    //shijianchuo是整数，否则要parseInt转换
+    var time = new Date(shijianchuo);
+    var y = time.getFullYear();
+    var m = time.getMonth() + 1;
+    var d = time.getDate();
+    var h = time.getHours();
+    var mm = time.getMinutes();
+    var s = time.getSeconds();
+    return y + '-' + add0(m) + '-' + add0(d) + ' ' + add0(h) + ':' + add0(mm) + ':' + add0(s);
+  }
+</script>
+
+<!--以Echarts方式加载动态地震-->
+<script>
+
+  /* //checjbox函数，搁置ing
+  var start_anime = document.getElementById('start_Anime')
+  start_anime.addEventListener('click', (event) => {
+
+    if (event.target.checked) {
+      mychart_earthquake.setOption(option_anime, true)
+    }
+
+    else {
+      var option_blank = {
+        title: {},
+        tooltip: {
+          trigger: 'item'
+        },
+        bmap: {
+          center: [104.114129, 37.550339],
+          zoom: 1,
+          roam: true,
+          mapStyle: {}
+        }
+      }
+      mychart_earthquake.setOption(option_blank, true)
+    }
+  }
+  ) */
+
+
+  //2022.9.3记，终于解决了困扰已久的问题：如何让程序在url数据加载完毕后再执行” 找到了解决方案，这其实就是一个异步问题，这里使用XMLHttpRequest的相关功能，这个方法的其他用途很值得开发
+  //修改代码结构，放弃之前以addEventListener人为异步的方式
+  /*当open的第三个参数为true时，只有当url中的资源加载完毕时，onload函数才会执行*/
+  var mapdata = new XMLHttpRequest();
+  mapdata.open("GET", "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson", true);
+  mapdata.send();
+
+  mapdata.onload = function () {
+
+    var datatest = mapdata.responseText//geojson数据被存在responseText之中，为string格式
+    var testjson = $.parseJSON(datatest)//将string格式数据保存为JSON格式，以便数据的读取与使用
+    console.log(testjson)
+
+
+    //JSON格式数据统一以json['']一层层读取
+    var feature = testjson['features']
+
+
+    var reshape = []
+    var reshape_anime = []//两个空
+
+    feature.forEach(function (item) {
+      var geo = item['geometry']
+      var coor = geo['coordinates'];
+
+      var property = item['properties']
+
+
+      var xy = [(coor[0]).toFixed(2), (coor[1]).toFixed(2), (coor[2]).toFixed(2)]
+      var xy_num = [parseFloat(xy[0]), parseFloat(xy[1]), parseFloat(xy[2])]
+      //console.log(xy_num)
+      var date_now = Date.now()
+      //进行震级区分与发震时间的区分
+      if (property['mag'] >= 5 && (date_now - property['time']) <= 259200000) {
+        reshape_anime.push({
+          name: property['place'].concat('\n', format(property['time'])),
+          value: [xy_num[0], xy_num[1], xy_num[2], property['mag']]
+        })
+      }
+      else {
+        reshape.push({
+          name: property['place'].concat('\n', format(property['time'])),
+          value: [xy_num[0], xy_num[1], xy_num[2], property['mag']]
+        })
+
+      }
+    })
+
+    var option_anime = {
+      title: {
+        text: '陈克杰课题组',
+        subtext: 'Earthquake data from USGS',
+        sublink: 'https://earthquake.usgs.gov/earthquakes/feed/',
+        left: 'center'
+      },
+      tooltip: {
+        trigger: 'item'
+      },
+
+      bmap: {
+        center: [104.114129, 37.550339],
+        zoom: 1,
+        roam: true,
+        mapStyle: {}
+      },
+      series: [
+        {
+          name: '近一月地震',
+          type: 'scatter',
+          coordinateSystem: 'bmap',
+          data: reshape,
+
+          symbolSize: function (val) {
+            var bj = 0
+            if (val[3] < 5.0) { bj = 15 - (5 - val[3]) * 3 }
+            else { bj = 15 + (val[3] - 5) * 6 }
+            return bj;
+          },
+          encode: { value: 2 },
+          label: {
+            formatter: '{b}',
+            position: 'right',
+            show: false
+          },
+          itemStyle: {
+            color: 'rgba(222,22,22,0.5)',
+          },
+          emphasis: {
+            label: {
+              show: false
+            }
+          }
+
+        },
+
+        {
+          name: '近一周五级以上地震',
+          type: 'effectScatter',
+          coordinateSystem: 'bmap',
+          data: reshape_anime,
+          symbolSize: function (val) {
+            return (20 + (val[3] - 5) * (val[3] - 5) * 12);
+          },
+          encode: {
+            value: 3
+          },
+          showEffectOn: 'render',
+          rippleEffect: {
+            brushType: 'stroke',
+          },
+
+          hoverAnimation: true,
+          label: {
+            normal: {
+              formatter: '{b}',
+              position: 'top',
+              show: true
+            }
+          },
+          itemStyle: {
+            color: 'purple',
+            shadowBlur: 10,
+            shadowColor: '#333'
+          },
+          zlevel: -100
+        }
+      ]
+    }
+    var mychart_earthquake = echarts.init(document.getElementById('map'));
+    mychart_earthquake.setOption(option_anime, true)
+
+
+
+    /*尝试获取echarts中的示例对象并作出修改以及添加标记等*/
+    var mybmap = mychart_earthquake.getModel().getComponent('bmap').getBMap();  //获取map
+
+    mybmap.setMapStyle({ style: 'normal' });//设置地图style
+
+    //其他控件等
+    mybmap.addControl(new BMap.MapTypeControl());
+    mybmap.addControl(new BMap.ScaleControl());
+    mybmap.enableContinuousZoom();
+    var c = new BMap.OverviewMapControl();
+    mybmap.addControl(c);
+
+
+    //用于手动加入课题组成果数据集，因为数据量较少可以直接代码内定义
+    var data_info = [['DOI:10.13203/j.whugis20220140', 98.251, 34.598, '/images/chs_1.png', '/images/label.png', 'http://ch.whu.edu.cn/cn/article/doi/10.13203/j.whugis20220140?viewType=SUP'],
+    ['https://doi.org/10.3390/rs14092018', -157.888, 55.364, '/images/ljf_1.png', '/images/label.png', 'https://doi.org/10.3390/rs14092018'],
+    ['https://doi.org/10.1016/j.tecto.2022.229542', 98.451, 35.0, '/images/lmz_1.png', '/images/label.png',]]
+
+    //遍历为每一个添加标记和图标与信息窗口
+    for (var i = 0; i < data_info.length; i++) {
+
+      var myIcon = new BMap.Icon(data_info[i][4], new BMap.Size(100, 100), { anchor: new BMap.Size(35, 35) });
+
+      var marker = new BMap.Marker(new BMap.Point(data_info[i][1], data_info[i][2]), { icon: myIcon })
+
+      var show_content =
+        "<h4 style='margin:0 0 5px 0;padding:0.2em 0'>" + "<a href=" + data_info[i][5] + " target='_blank'>" + data_info[i][0] + "</a>" + "</h4>" +
+        "<img style='float:right;margin:4px' id='imgDemo' src='" + data_info[i][3] + "' width='450' height='615' ' />"
+      mybmap.addOverlay(marker);
+      addClickHandler(show_content, marker);
+    }
+    //设置点击mark打开信息窗口
+    function addClickHandler(cont, mark) {
+      mark.addEventListener("click", function (e) {
+        openInfo(cont, e)
+      })
+    }
+    //设置信息窗口对象
+    function openInfo(cont, e) {
+      var p = e.target;
+      var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
+      var infoWindow = new BMap.InfoWindow(cont, { height: 0, width: 0 });  // 创建信息窗口对象
+      mybmap.openInfoWindow(infoWindow, point); //开启信息窗口
+    }
+
+
+    //页面大小改变，resize
+    window.addEventListener('resize', mychart_earthquake.resize);
+    //按键resize
+    window.addEventListener('keydown', mychart_earthquake.resize);
+
+    //关闭卡片，resize一次,可以解决因为flex改变了div的长度使scatter出现切割现象
+    var resize = document.getElementById('cancel')
+    resize.addEventListener('click', (event) => {
+      setTimeout(function () { mychart_earthquake.resize() }, 500);
+    })
+
+    //mounted函数内置了setinternal按间隔刷新option
+    mounted(mychart_earthquake, option_anime)
+  }
+</script>
+
+</html>
