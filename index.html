@@ -43,14 +43,14 @@
   }
 
   #header #title {
-    width: 1000px;
+    width: 550px;
     height: 100%;
     margin: 0 auto;
-   
-    
+
+
     background-image: url('./images/department_logo/blue_cn_dp.png'), url('./images/校徽+中英文火炬/组合1：校徽+中英文校名-左右/LOGO.png');
     background-size: auto 100%, auto 260px;
-    background-position: 66% 50%, 34% 50%;
+    background-position: 100% 50%, 0% 50%;
     background-repeat: no-repeat;
 
 
@@ -216,8 +216,8 @@
       <li style="text-align:center">
         <a href="http://ess.sustech.edu.cn/New-detail-id-655.html" target="_blank" style="display:inline "><i
             class="fa fa-plane" aria-hidden="true"></i>青海科考</a>&nbsp
-        <a href="./videos/video_1.mp4" target="_blank" style="display:inline"><i class="fa fa-file-video-o"
-            aria-hidden="true"></i></a>
+        <a href="https://www.bilibili.com/video/BV1Yg411k7gG?spm_id_from=333.999.0.0&vd_source=47b2afbe45bd57551a7d1e2080630131&t=65.8"
+          target="_blank" style="display:inline"><i class="fa fa-file-video-o" aria-hidden="true"></i></a>
 
       </li>
     </ul>
@@ -454,12 +454,13 @@
     //用于手动加入课题组成果数据集，因为数据量较少可以直接代码内定义
     var data_info = [['DOI:10.13203/j.whugis20220140', 98.251, 34.598, './images/chs_1.png', './images/label.png', 'http://ch.whu.edu.cn/cn/article/doi/10.13203/j.whugis20220140?viewType=SUP'],
     ['https://doi.org/10.3390/rs14092018', -157.888, 55.364, './images/ljf_1.png', './images/label.png', 'https://doi.org/10.3390/rs14092018'],
-    ['https://doi.org/10.1016/j.tecto.2022.229542', 98.451, 35.0, './images/lmz_1.png', './images/label.png',]]
+    ['https://doi.org/10.1016/j.tecto.2022.229542', 98.451, 35.0, './images/lmz_1.png', './images/label.png',],
+    ['https://doi.org/10.1007/s10346-021-01782-7',109.305045,30.369805,'./images/xch_1.png','./images/landslide.png','https://doi.org/10.1007/s10346-021-01782-7']]
 
     //遍历为每一个添加标记和图标与信息窗口
     for (var i = 0; i < data_info.length; i++) {
 
-      var myIcon = new BMap.Icon(data_info[i][4], new BMap.Size(100, 100), { anchor: new BMap.Size(35, 35) });
+      var myIcon = new BMap.Icon(data_info[i][4], new BMap.Size(100, 100), { anchor: new BMap.Size(10, 10) });
 
       var marker = new BMap.Marker(new BMap.Point(data_info[i][1], data_info[i][2]), { icon: myIcon })
 
