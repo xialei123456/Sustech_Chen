@@ -23,8 +23,7 @@
   <!-- 开源库jQuery -->
   <script src="libs/jquery-1.11.2.min.js"></script>
 
-  <!-- fileSaver开源库，用于保存数据 -->
-  <script src="libs/FileSaver.js"></script>
+
 
   <!-- 百度API -->
   <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=kB5yeVizxgKa82lXGOdvTiEpyzPeEzSx"></script>
@@ -49,7 +48,7 @@
     margin: 0 auto;
    
     
-    background-image: url('/images/department_logo/blue_cn_dp.png'), url('/images/校徽+中英文火炬/组合1：校徽+中英文校名-左右/LOGO.png');
+    background-image: url('./images/department_logo/blue_cn_dp.png'), url('./images/校徽+中英文火炬/组合1：校徽+中英文校名-左右/LOGO.png');
     background-size: auto 100%, auto 260px;
     background-position: 66% 50%, 34% 50%;
     background-repeat: no-repeat;
@@ -217,7 +216,7 @@
       <li style="text-align:center">
         <a href="http://ess.sustech.edu.cn/New-detail-id-655.html" target="_blank" style="display:inline "><i
             class="fa fa-plane" aria-hidden="true"></i>青海科考</a>&nbsp
-        <a href="/videos/video_1.mp4" target="_blank" style="display:inline"><i class="fa fa-file-video-o"
+        <a href="./videos/video_1.mp4" target="_blank" style="display:inline"><i class="fa fa-file-video-o"
             aria-hidden="true"></i></a>
 
       </li>
@@ -226,7 +225,7 @@
       <li style="text-align:center">
         <a href="https://faculty.sustech.edu.cn/chenkj/" target="_blank" style="display:inline "><i
             class="fa fa-address-book"></i>关于我们</a>&nbsp
-        <a href="/videos/video_0.mp4" target="_blank" style="display:inline"><i class="fa fa-file-video-o"
+        <a href="./videos/video_0.mp4" target="_blank" style="display:inline"><i class="fa fa-file-video-o"
             aria-hidden="true"></i></a>
       </li>
     </ul>
@@ -245,7 +244,7 @@
   //为动态地震设计的刷新函数
   function mounted(item, option) {
     this.interval = setInterval(() => {
-      //window.location.reload();
+      window.location.reload();
       item.setOption(option)
       console.log('option 已重新')
       //selectAdd()  
@@ -253,6 +252,7 @@
     document.onclick = (event) => {
       clearInterval(this.interval);
       this.interval = setInterval(() => {
+        window.location.reload();
         item.setOption(option)
         console.log('option 已重新1')
         //selectAdd()
@@ -452,9 +452,9 @@
 
 
     //用于手动加入课题组成果数据集，因为数据量较少可以直接代码内定义
-    var data_info = [['DOI:10.13203/j.whugis20220140', 98.251, 34.598, '/images/chs_1.png', '/images/label.png', 'http://ch.whu.edu.cn/cn/article/doi/10.13203/j.whugis20220140?viewType=SUP'],
-    ['https://doi.org/10.3390/rs14092018', -157.888, 55.364, '/images/ljf_1.png', '/images/label.png', 'https://doi.org/10.3390/rs14092018'],
-    ['https://doi.org/10.1016/j.tecto.2022.229542', 98.451, 35.0, '/images/lmz_1.png', '/images/label.png',]]
+    var data_info = [['DOI:10.13203/j.whugis20220140', 98.251, 34.598, './images/chs_1.png', './images/label.png', 'http://ch.whu.edu.cn/cn/article/doi/10.13203/j.whugis20220140?viewType=SUP'],
+    ['https://doi.org/10.3390/rs14092018', -157.888, 55.364, './images/ljf_1.png', './images/label.png', 'https://doi.org/10.3390/rs14092018'],
+    ['https://doi.org/10.1016/j.tecto.2022.229542', 98.451, 35.0, './images/lmz_1.png', './images/label.png',]]
 
     //遍历为每一个添加标记和图标与信息窗口
     for (var i = 0; i < data_info.length; i++) {
