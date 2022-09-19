@@ -5,8 +5,8 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>南方科技大学陈克杰课题组</title>
   <!--标题-->
+  <title>南方科技大学陈克杰课题组</title>
 
   <!--Echarts-->
   <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@4.6.0/dist/echarts.min.js"></script>
@@ -16,19 +16,19 @@
   <!--FontAwesome开源库-->
   <link type="text/css" rel="stylesheet" href="libs/font-awesome-4.7.0/css/font-awesome.min.css">
 
-  <!--ol库-->
-  <link rel="stylesheet" href="libs/ol.css">
-  <script src="libs/ol.js"></script>
 
   <!-- 开源库jQuery -->
   <script src="libs/jquery-1.11.2.min.js"></script>
-
-
 
   <!-- 百度API -->
   <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=kB5yeVizxgKa82lXGOdvTiEpyzPeEzSx"></script>
   <script type="text/javascript"
     src="https://fastly.jsdelivr.net/npm/echarts@4.6.0/dist/extension/bmap.min.js"></script>
+
+
+  <script type="text/javascript"
+    src="https://api.map.baidu.com/api?v=1.0&&type=webgl&ak=kB5yeVizxgKa82lXGOdvTiEpyzPeEzSx"></script>
+
 </head>
 
 <style>
@@ -46,14 +46,11 @@
     width: 550px;
     height: 100%;
     margin: 0 auto;
-
-
+    /*设置logo*/
     background-image: url('./images/department_logo/blue_cn_dp.png'), url('./images/校徽+中英文火炬/组合1：校徽+中英文校名-左右/LOGO.png');
     background-size: auto 100%, auto 260px;
     background-position: 100% 50%, 0% 50%;
     background-repeat: no-repeat;
-
-
   }
 
   * {
@@ -187,6 +184,29 @@
     height: 100%;
     margin-top: 55px
   }
+
+  /*科考信息窗口的可滑动css*/
+  #img-content {
+            width: 100%;
+            
+            overflow-x: auto;
+        }
+        .img-list {
+            display: flex;
+            width: 2400px;
+        }
+        .img-list .img-list-item {
+            width: 100%;
+            height: 100%;
+        }
+        .img-list .img-list-item + .img-list-item {
+            margin-left: 20px;
+        }
+        .img-list .img-list-item img {
+            width: 100%;
+            height: 100%;
+        }
+      
 </style>
 
 <body>
@@ -305,6 +325,7 @@
   ) */
 
 
+
   //2022.9.3记，终于解决了困扰已久的问题：如何让程序在url数据加载完毕后再执行” 找到了解决方案，这其实就是一个异步问题，这里使用XMLHttpRequest的相关功能，这个方法的其他用途很值得开发
   //修改代码结构，放弃之前以addEventListener人为异步的方式
   /*当open的第三个参数为true时，只有当url中的资源加载完毕时，onload函数才会执行*/
@@ -312,21 +333,20 @@
   mapdata.open("GET", "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson", true);
   mapdata.send();
 
+
+  //使用onload启动Echarts绘制
   mapdata.onload = function () {
 
     var datatest = mapdata.responseText//geojson数据被存在responseText之中，为string格式
     var testjson = $.parseJSON(datatest)//将string格式数据保存为JSON格式，以便数据的读取与使用
     console.log(testjson)
-
-
     //JSON格式数据统一以json['']一层层读取
     var feature = testjson['features']
 
-
     var reshape = []
-    var reshape_anime = []//两个空
-
+    var reshape_anime = []//两个空数集，分别用于存储series里的两部分数据
     feature.forEach(function (item) {
+      //遍历，然后根据JSON取值方法对其进行取值
       var geo = item['geometry']
       var coor = geo['coordinates'];
 
@@ -337,8 +357,8 @@
       var xy_num = [parseFloat(xy[0]), parseFloat(xy[1]), parseFloat(xy[2])]
       //console.log(xy_num)
       var date_now = Date.now()
-      //进行震级区分与发震时间的区分
-      if (property['mag'] >= 5 && (date_now - property['time']) <= 259200000) {
+      //进行震级区分与发震时间的区分，并分别使用push函数给[]中赋值
+      if (property['mag'] >= 6 && (date_now - property['time']) <= (7 * 24 * 60 * 60 * 1000)) {
         reshape_anime.push({
           name: property['place'].concat('\n', format(property['time'])),
           value: [xy_num[0], xy_num[1], xy_num[2], property['mag']]
@@ -353,6 +373,8 @@
       }
     })
 
+
+    //Echarts配置项
     var option_anime = {
       title: {
         text: '陈克杰课题组',
@@ -363,7 +385,7 @@
       tooltip: {
         trigger: 'item'
       },
-
+      //由option创建bmap实例对象
       bmap: {
         center: [104.114129, 37.550339],
         zoom: 1,
@@ -421,7 +443,7 @@
             normal: {
               formatter: '{b}',
               position: 'top',
-              show: true
+              show: true//显示标签，默认使用name中的数据
             }
           },
           itemStyle: {
@@ -433,10 +455,8 @@
         }
       ]
     }
-    var mychart_earthquake = echarts.init(document.getElementById('map'));
-    mychart_earthquake.setOption(option_anime, true)
-
-
+    var mychart_earthquake = echarts.init(document.getElementById('map'));//初始化
+    mychart_earthquake.setOption(option_anime, true)//绘制
 
     /*尝试获取echarts中的示例对象并作出修改以及添加标记等*/
     var mybmap = mychart_earthquake.getModel().getComponent('bmap').getBMap();  //获取map
@@ -454,18 +474,18 @@
     //用于手动加入课题组成果数据集，因为数据量较少可以直接代码内定义
     var data_info = [['DOI: 10.13203/j.whugis20220140', 98.251, 34.598, './images/chs_1.png', './images/label.png', 'http://ch.whu.edu.cn/cn/article/doi/10.13203/j.whugis20220140?viewType=SUP'],
     ['DOI: 10.3390/rs14092018', -157.888, 55.364, './images/ljf_1.png', './images/label.png', 'https://doi.org/10.3390/rs14092018'],
-    ['DOI: 10.1016/j.tecto.2022.229542', 98.451, 35.0, './images/lmz_1.png', './images/label.png','https://doi.org/10.1016/j.tecto.2022.229542'],
+    ['DOI: 10.1016/j.tecto.2022.229542', 98.451, 35.0, './images/lmz_1.png', './images/label.png', 'https://doi.org/10.1016/j.tecto.2022.229542'],
     ['DOI: 10.1007/s10346-021-01782-7', 109.305045, 30.369805, './images/xch_1.png', './images/landslide.png', 'https://doi.org/10.1007/s10346-021-01782-7'],
     ['DOI: 10.3390/s19112559', 114.25, 22.25, './images/wgg_1.png', './images/label.png', 'https://doi.org/10.3390/s19112559'],
     ['DOI: 10.11947/j.AGCS.2021.20200163', 108.93, 34.27, './images/zh_1.png', './images/label.png', 'http://xb.chinasmp.com/CN/Y2021/V50/I3/356']]
 
     //遍历为每一个添加标记和图标与信息窗口
     for (var i = 0; i < data_info.length; i++) {
-
+      //为每一个Marker设定icon,这样得到的size和anchor是一致地
       var myIcon = new BMap.Icon(data_info[i][4], new BMap.Size(25, 25), { anchor: new BMap.Size(10, 10) });
-
+      //Marker的定义，这里只用上了point类型，后续有需要可以研究其他的使用
       var marker = new BMap.Marker(new BMap.Point(data_info[i][1], data_info[i][2]), { icon: myIcon })
-
+      //为信息窗口设定内容
       var show_content =
         "<h4 style='margin:0 0 5px 0;padding:0.2em 0'>" + "<a href=" + data_info[i][5] + " target='_blank'>" + data_info[i][0] + "</a>" + "</h4>" +
         "<img style='float:right;margin:4px' id='imgDemo' src='" + data_info[i][3] + "' width='450' height='615' ' />"
@@ -486,7 +506,45 @@
       mybmap.openInfoWindow(infoWindow, point); //开启信息窗口
     }
 
+    //科考
+    var icon_qinghai = new BMap.Icon('./images/qinghai/qinghai_label.png', new BMap.Size(70, 100), { anchor: new BMap.Size(10, 10) })
+    var qinghai_marker = new BMap.Marker(new BMap.Point(99.895, 36.693), { icon: icon_qinghai })
+    var qinghai_show = ` 
+    <h3 style='text-align:center;margin:4px'>青海科考</h3>
+<div id="img-content">
 
+        <ul class="img-list">
+            <li class="img-list-item">
+                <img src="./images/qinghai/qinghai_01.jpg" alt="">
+            </li>
+            <li class="img-list-item">
+                <img src="./images/qinghai/qinghai_02.jpg" alt="">
+            </li>
+            <li class="img-list-item">
+                <img src="./images/qinghai/qinghai_03.jpg" alt="">
+            </li>
+            <li class="img-list-item">
+                <img src="./images/qinghai/qinghai_04.jpg" alt="">
+            </li>
+            <li class="img-list-item">
+                <img src="./images/qinghai/qinghai_05.jpg" alt="">
+            </li>
+            <li class="img-list-item">
+                <video src="./videos/video_1.mp4" controls="controls" poster="./videos/poster_1.png"  width="100%" height="250px" alt=""></video>
+            </li>
+        </ul>
+    </div>
+    `
+    mybmap.addOverlay(qinghai_marker)
+
+    qinghai_marker.addEventListener("click",function(e){
+      var p = e.target;
+      var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
+      var infoWindow = new BMap.InfoWindow(qinghai_show, { height: 300, width: 400 });  // 创建信息窗口对象
+      mybmap.openInfoWindow(infoWindow, point); //开启信息窗口
+    })
+   
+    
     //页面大小改变，resize
     window.addEventListener('resize', mychart_earthquake.resize);
     //按键resize
@@ -500,6 +558,23 @@
 
     //mounted函数内置了setinternal按间隔刷新option
     mounted(mychart_earthquake, option_anime)
+
+
+    //测试定位  发现了一个被忽视的小问题，原来我一直用的是3.0的百度api，使用的是BMap下的功能
+    //后面开发可能更多的要接触1.0的WebGL下的若干功能
+    //比如此例也可以用BMap的，但是BMapGL似乎更加简便
+    var location = new BMapGL.Geolocation();
+    location.getCurrentPosition(function (r) {
+      if (this.getStatus() == BMAP_STATUS_SUCCESS) {
+
+        var mk = new BMap.Marker(new BMap.Point(r.point.lng, r.point.lat));
+        mybmap.addOverlay(mk);
+        //alert('您的位置：' + r.point.lng + ',' + r.point.lat);
+      }
+      else {
+        //alert('failed' + this.getStatus());
+      }
+    });
   }
 </script>
 
