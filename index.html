@@ -187,26 +187,29 @@
 
   /*科考信息窗口的可滑动css*/
   #img-content {
-            width: 100%;
-            
-            overflow-x: auto;
-        }
-        .img-list {
-            display: flex;
-            width: 2400px;
-        }
-        .img-list .img-list-item {
-            width: 100%;
-            height: 100%;
-        }
-        .img-list .img-list-item + .img-list-item {
-            margin-left: 20px;
-        }
-        .img-list .img-list-item img {
-            width: 100%;
-            height: 100%;
-        }
-      
+    width: 100%;
+
+    overflow-x: auto;
+  }
+
+  .img-list {
+    display: flex;
+    width: 2400px;
+  }
+
+  .img-list .img-list-item {
+    width: 100%;
+    height: 100%;
+  }
+
+  .img-list .img-list-item+.img-list-item {
+    margin-left: 20px;
+  }
+
+  .img-list .img-list-item img {
+    width: 100%;
+    height: 100%;
+  }
 </style>
 
 <body>
@@ -247,6 +250,21 @@
             class="fa fa-address-book"></i>关于我们</a>&nbsp
         <a href="./videos/video_0.mp4" target="_blank" style="display:inline"><i class="fa fa-file-video-o"
             aria-hidden="true"></i></a>
+      </li>
+    </ul>
+
+    <ul>
+      <li style="text-align:center">
+      <li>
+        <a href="#">
+          <!-- <i class="fa fa-address-book"></i> -->
+          <strong style="font-size: larger;">成果</strong>
+          <input type="checkbox" id="setmarker" checked>
+          <!-- <i class="fa fa-address-book"></i> -->&nbsp
+          <strong style="font-size: larger;">地震</strong>
+          <input type="checkbox" id="setearthquake" checked>
+        </a>
+      </li>
       </li>
     </ul>
   </div>
@@ -455,6 +473,28 @@
         }
       ]
     }
+
+    var option_empty = {
+      title: {
+        text: '陈克杰课题组',
+        subtext: 'Earthquake data from USGS',
+        sublink: 'https://earthquake.usgs.gov/earthquakes/feed/',
+        left: 'center'
+      },
+      tooltip: {
+        trigger: 'item'
+      },
+      //由option创建bmap实例对象
+      bmap: {
+        center: [104.114129, 37.550339],
+        zoom: 1,
+        roam: true,
+        mapStyle: {}
+      },
+      series: []
+
+    }
+
     var mychart_earthquake = echarts.init(document.getElementById('map'));//初始化
     mychart_earthquake.setOption(option_anime, true)//绘制
 
@@ -472,44 +512,46 @@
 
 
     //用于手动加入课题组成果数据集，因为数据量较少可以直接代码内定义
-    var data_info = [['DOI: 10.13203/j.whugis20220140', 98.251, 34.598, './images/chs_1.png', './images/label.png', 'http://ch.whu.edu.cn/cn/article/doi/10.13203/j.whugis20220140?viewType=SUP'],
-    ['DOI: 10.3390/rs14092018', -157.888, 55.364, './images/ljf_1.png', './images/label.png', 'https://doi.org/10.3390/rs14092018'],
-    ['DOI: 10.1016/j.tecto.2022.229542', 98.451, 35.0, './images/lmz_1.png', './images/label.png', 'https://doi.org/10.1016/j.tecto.2022.229542'],
-    ['DOI: 10.1007/s10346-021-01782-7', 109.305045, 30.369805, './images/xch_1.png', './images/landslide.png', 'https://doi.org/10.1007/s10346-021-01782-7'],
-    ['DOI: 10.3390/s19112559', 114.25, 22.25, './images/wgg_1.png', './images/label.png', 'https://doi.org/10.3390/s19112559'],
-    ['DOI: 10.11947/j.AGCS.2021.20200163', 108.93, 34.27, './images/zh_1.png', './images/label.png', 'http://xb.chinasmp.com/CN/Y2021/V50/I3/356']]
+    var data_info = [['DOI: 10.13203/j.whugis20220140', 98.251, 34.598, './images/chs_1.png', './images/label.png', 'http://ch.whu.edu.cn/cn/article/doi/10.13203/j.whugis20220140?viewType=SUP', "show"],
+    ['DOI: 10.3390/rs14092018', -157.888, 55.364, './images/ljf_1.png', './images/label.png', 'https://doi.org/10.3390/rs14092018', "show"],
+    ['DOI: 10.1016/j.tecto.2022.229542', 98.451, 35.0, './images/lmz_1.png', './images/label.png', 'https://doi.org/10.1016/j.tecto.2022.229542', "show"],
+    ['DOI: 10.1007/s10346-021-01782-7', 109.305045, 30.369805, './images/xch_1.png', './images/landslide.png', 'https://doi.org/10.1007/s10346-021-01782-7', "show"],
+    ['DOI: 10.3390/s19112559', 114.25, 22.25, './images/wgg_1.png', './images/label.png', 'https://doi.org/10.3390/s19112559', "show"],
+    ['DOI: 10.11947/j.AGCS.2021.20200163', 108.93, 34.27, './images/zh_1.png', './images/label.png', 'http://xb.chinasmp.com/CN/Y2021/V50/I3/356', "show"]]
 
     //遍历为每一个添加标记和图标与信息窗口
-    for (var i = 0; i < data_info.length; i++) {
-      //为每一个Marker设定icon,这样得到的size和anchor是一致地
-      var myIcon = new BMap.Icon(data_info[i][4], new BMap.Size(25, 25), { anchor: new BMap.Size(10, 10) });
-      //Marker的定义，这里只用上了point类型，后续有需要可以研究其他的使用
-      var marker = new BMap.Marker(new BMap.Point(data_info[i][1], data_info[i][2]), { icon: myIcon })
-      //为信息窗口设定内容
-      var show_content =
-        "<h4 style='margin:0 0 5px 0;padding:0.2em 0'>" + "<a href=" + data_info[i][5] + " target='_blank'>" + data_info[i][0] + "</a>" + "</h4>" +
-        "<img style='float:right;margin:4px' id='imgDemo' src='" + data_info[i][3] + "' width='450' height='615' ' />"
-      mybmap.addOverlay(marker);
-      addClickHandler(show_content, marker);
-    }
-    //设置点击mark打开信息窗口
-    function addClickHandler(cont, mark) {
-      mark.addEventListener("click", function (e) {
-        openInfo(cont, e)
-      })
-    }
-    //设置信息窗口对象
-    function openInfo(cont, e) {
-      var p = e.target;
-      var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
-      var infoWindow = new BMap.InfoWindow(cont, { height: 0, width: 0 });  // 创建信息窗口对象
-      mybmap.openInfoWindow(infoWindow, point); //开启信息窗口
-    }
+    function drawmarker(bmap) {
+      for (var i = 0; i < data_info.length; i++) {
+        //为每一个Marker设定icon,这样得到的size和anchor是一致地
+        var myIcon = new BMap.Icon(data_info[i][4], new BMap.Size(25, 25), { anchor: new BMap.Size(10, 10) });
+        //Marker的定义，这里只用上了point类型，后续有需要可以研究其他的使用
+        var marker = new BMap.Marker(new BMap.Point(data_info[i][1], data_info[i][2]), { icon: myIcon })
+        //为信息窗口设定内容
+        var show_content =
+          "<h4 style='margin:0 0 5px 0;padding:0.2em 0'>" + "<a href=" + data_info[i][5] + " target='_blank'>" + data_info[i][0] + "</a>" + "</h4>" +
+          "<img style='float:right;margin:4px' id='imgDemo' src='" + data_info[i][3] + "' width='450' height='615' ' />"
+        bmap.addOverlay(marker);
+        addClickHandler(show_content, marker);
+      }
 
-    //科考
-    var icon_qinghai = new BMap.Icon('./images/qinghai/qinghai_label.png', new BMap.Size(70, 100), { anchor: new BMap.Size(10, 10) })
-    var qinghai_marker = new BMap.Marker(new BMap.Point(99.895, 36.693), { icon: icon_qinghai })
-    var qinghai_show = ` 
+      //设置点击mark打开信息窗口
+      function addClickHandler(cont, mark) {
+        mark.addEventListener("click", function (e) {
+          openInfo(cont, e)
+        })
+      }
+      //设置信息窗口对象
+      function openInfo(cont, e) {
+        var p = e.target;
+        var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
+        var infoWindow = new BMap.InfoWindow(cont, { height: 0, width: 0 });  // 创建信息窗口对象
+        bmap.openInfoWindow(infoWindow, point); //开启信息窗口
+      }
+
+      //科考
+      var icon_qinghai = new BMap.Icon('./images/qinghai/qinghai_label.png', new BMap.Size(70, 100), { anchor: new BMap.Size(10, 10) })
+      var qinghai_marker = new BMap.Marker(new BMap.Point(99.895, 36.693), { icon: icon_qinghai })
+      var qinghai_show = ` 
     <h3 style='text-align:center;margin:4px'>青海科考</h3>
 <div id="img-content">
 
@@ -535,16 +577,18 @@
         </ul>
     </div>
     `
-    mybmap.addOverlay(qinghai_marker)
+      bmap.addOverlay(qinghai_marker)
 
-    qinghai_marker.addEventListener("click",function(e){
-      var p = e.target;
-      var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
-      var infoWindow = new BMap.InfoWindow(qinghai_show, { height: 300, width: 400 });  // 创建信息窗口对象
-      mybmap.openInfoWindow(infoWindow, point); //开启信息窗口
-    })
-   
-    
+      qinghai_marker.addEventListener("click", function (e) {
+        var p = e.target;
+        var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
+        var infoWindow = new BMap.InfoWindow(qinghai_show, { height: 300, width: 400 });  // 创建信息窗口对象
+        bmap.openInfoWindow(infoWindow, point); //开启信息窗口
+      })
+    }
+    drawmarker(mybmap)
+
+
     //页面大小改变，resize
     window.addEventListener('resize', mychart_earthquake.resize);
     //按键resize
@@ -575,7 +619,57 @@
         //alert('failed' + this.getStatus());
       }
     });
+
+
+
+    /*实现图层自由切换*/
+
+    //根据标签移除marker的函数
+    function remove_mark(id) {
+      var all = mybmap.getOverlays();
+      for (let i = 0; i < all.length - 1; i++) {
+        if (all[i][6] == id) {
+          mybmap.removeOverlay(all[i])
+        }
+      }
+    }
+
+    //链接用于切换标记的复选框，并设定响应函数
+    var setmark = document.getElementById('setmarker')
+    setmark.addEventListener('click', (event) => {
+      if (event.target.checked) {
+        //由于切换地震显示会刷新option，故需重新获取最新的bmap对象并予以赋值，后面同理
+        mybmap = mychart_earthquake.getModel().getComponent('bmap').getBMap();  //获取map
+        drawmarker(mybmap)
+      }
+      else {
+        mybmap = mychart_earthquake.getModel().getComponent('bmap').getBMap();  //获取map
+        remove_mark()
+      }
+    })
+
+    //链接用于切换地震的复选框，并设定响应函数
+    var setpoint = document.getElementById('setearthquake')
+    setpoint.addEventListener('click', (event) => {
+      if (event.target.checked) {
+        mychart_earthquake.setOption(option_anime, true)//绘制
+        mybmap = mychart_earthquake.getModel().getComponent('bmap').getBMap();  //获取map
+       //为不影响标记的状态，需要进行检查并恢复标记
+        if (setmark.checked == true) { drawmarker(mybmap) }
+        else { }
+      }
+      else {
+        mychart_earthquake.setOption(option_empty, true)//绘制
+        mybmap = mychart_earthquake.getModel().getComponent('bmap').getBMap();  //获取map
+        if (setmark.checked == true) { drawmarker(mybmap) }
+        else { }
+      }
+    })
   }
+</script>
+
+<script>
+
 </script>
 
 </html>
